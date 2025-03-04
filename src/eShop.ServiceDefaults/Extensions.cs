@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
@@ -63,7 +62,8 @@ public static partial class Extensions
                     .AddRuntimeInstrumentation()
                     .AddMeter("Experimental.Microsoft.Extensions.AI",
                     "System.Net.Http",
-                    "Microsoft.AspNetCore.Hosting");
+                    "Microsoft.AspNetCore.Hosting",
+                    "BasketApi.Basket");
             })
             .WithTracing(tracing =>
             {

@@ -4,6 +4,15 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 builder.AddForwardedHeaders();
 
+var grafana = builder.AddContainer("grafana","grafana/grafana")
+    .WithBindMount("/Users/ilker/Courses/AS/eShop-Dotnet/grafana/config", "/etc/grafana")
+    .WithBindMount("/Users/ilker/Courses/AS/eShop-Dotnet/grafana/dashboards", "/var/lib/grafana/dashboards")
+    .WithEndpoint(port:3000, targetPort:3000, name:"grafana-http", scheme:"http");
+
+builder.AddContainer("prometheus","prom/prometheus")
+    .WithBindMount("/Users/ilker/Courses/AS/eShop-Dotnet/prometheus", "/etc/prometheus")
+    .WithEndpoint(port:9090, targetPort:9090, name:"prometheus");
+
 var redis = builder.AddRedis("redis");
 var rabbitMq = builder.AddRabbitMQ("eventbus")
     .WithLifetime(ContainerLifetime.Persistent);
@@ -29,12 +38,15 @@ var identityEndpoint = identityApi.GetEndpoint(launchProfileName);
 var basketApi = builder.AddProject<Projects.Basket_API>("basket-api")
     .WithReference(redis)
     .WithReference(rabbitMq).WaitFor(rabbitMq)
-    .WithEnvironment("Identity__Url", identityEndpoint);
+    .WithEnvironment("Identity__Url", identityEndpoint)
+    .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("grafana-http"));
+
 redis.WithParentRelationship(basketApi);
 
 var catalogApi = builder.AddProject<Projects.Catalog_API>("catalog-api")
     .WithReference(rabbitMq).WaitFor(rabbitMq)
-    .WithReference(catalogDb);
+    .WithReference(catalogDb)
+    .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("grafana-http"));
 
 var orderingApi = builder.AddProject<Projects.Ordering_API>("ordering-api")
     .WithReference(rabbitMq).WaitFor(rabbitMq)
@@ -73,7 +85,8 @@ var webApp = builder.AddProject<Projects.WebApp>("webapp", launchProfileName)
     .WithReference(catalogApi)
     .WithReference(orderingApi)
     .WithReference(rabbitMq).WaitFor(rabbitMq)
-    .WithEnvironment("IdentityUrl", identityEndpoint);
+    .WithEnvironment("IdentityUrl", identityEndpoint)
+    .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("grafana-http"));
 
 // set to true if you want to use OpenAI
 bool useOpenAI = false;
