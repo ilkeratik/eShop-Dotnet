@@ -9,9 +9,10 @@ var grafana = builder.AddContainer("grafana","grafana/grafana")
     .WithBindMount("/Users/ilker/Courses/AS/eShop-Dotnet/grafana/dashboards", "/var/lib/grafana/dashboards")
     .WithEndpoint(port:3000, targetPort:3000, name:"grafana-http", scheme:"http");
 
-builder.AddContainer("prometheus","prom/prometheus")
+var prometheus = builder.AddContainer("prometheus", "prom/prometheus")
     .WithBindMount("/Users/ilker/Courses/AS/eShop-Dotnet/prometheus", "/etc/prometheus")
-    .WithEndpoint(port:9090, targetPort:9090, name:"prometheus");
+    .WithArgs("--web.enable-otlp-receiver", "--config.file=/etc/prometheus/prometheus.yml")
+    .WithEndpoint(port: 9090, targetPort: 9090, name: "prometheus", scheme:"http");
 
 var redis = builder.AddRedis("redis");
 var rabbitMq = builder.AddRabbitMQ("eventbus")

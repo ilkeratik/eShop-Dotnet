@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using eShop.ServiceDefaults.Processor;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -52,6 +53,7 @@ public static partial class Extensions
         {
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
+            logging.AddOtlpExporter();
         });
 
         builder.Services.AddOpenTelemetry()
@@ -63,7 +65,7 @@ public static partial class Extensions
                     .AddMeter("Experimental.Microsoft.Extensions.AI",
                     "System.Net.Http",
                     "Microsoft.AspNetCore.Hosting",
-                    "BasketApi.Basket");
+                    "BasketApi.Basket", "Basket.API.Count");
             })
             .WithTracing(tracing =>
             {
@@ -76,7 +78,14 @@ public static partial class Extensions
                 tracing.AddAspNetCoreInstrumentation()
                     .AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddSource("Experimental.Microsoft.Extensions.AI");
+                    .AddAspNetCoreInstrumentation()
+                    .AddConsoleExporter()
+                    .AddSource("Experimental.Microsoft.Extensions.AI")
+                    .AddSource("LoginService")
+                    .AddSource("Basket.API.Redis")
+                    .AddSource("BasketApi.Basket")
+                    .AddProcessor(new MyEnrichingProcessor())
+                    .AddProcessor(new MyFilteringProcessor());
             });
 
         builder.AddOpenTelemetryExporters();
