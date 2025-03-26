@@ -1,3 +1,23 @@
+# Enhancing Observability of eShop project
+
+The extension will be focused on improving application’ observ-
+ability using OpenTelemetry (OTel) and other tools. In order to make a system observable it must be
+instrumented first, meaning the application should create and emit (export) its traces, metrics and logs.
+Then a backend can listen to this data (a.k.a telemetry) then structure, store, visualize and more. The
+eShop project already has a decent level of observability because it’s already well integrated with OTel, and
+using the Aspire that acts as the observability backend, it collects and visualize the telemetry data however it
+should be noted that Aspire doesn’t persist this data by default. Aspire is able to collect OTel data because
+it has an OTel Collector embedded inside.
+
+## Read the document
+[Enhancing Observability of eShop project](https://github.com/user-attachments/files/19476437/AS_P1.pdf)
+
+## Overall diagram
+![Overall diagram](https://github.com/user-attachments/assets/dfe1fbbf-276f-4df4-9916-c80d50159d5f)
+
+
+
+
 # eShop Reference Application - "AdventureWorks"
 
 A reference .NET application implementing an e-commerce website using a services-based architecture using [.NET Aspire](https://learn.microsoft.com/dotnet/aspire/).
